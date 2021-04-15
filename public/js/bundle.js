@@ -2246,9 +2246,8 @@ class CreateTaskRandomView extends CreateTaskView {
         const paramsObject = _objectSpread(_objectSpread(_objectSpread({}, vivaRefRes), levelRes), nonToggleValues);
 
         const params = new URLSearchParams(paramsObject);
-        const searchParams = decodeURIComponent(params.toString());
         const taskDetails = this.getValues('.task-details');
-        callback(searchParams, taskDetails);
+        callback(params, taskDetails);
       });
     });
 
@@ -2284,10 +2283,15 @@ class CreateTaskRandomView extends CreateTaskView {
     const higherValue = this.elements[checkTwo.name].value;
 
     if (checkTwo.checked) {
-      const res = "{\"".concat(searchParam, "[gte]\": ").concat(lowerValue, ",\n\t\t  \"").concat(searchParam, "[lte]\": ").concat(higherValue, "}");
+      const res = {
+        ["".concat(searchParam, "[gte]")]: lowerValue,
+        ["".concat(searchParam, "[lte]")]: higherValue
+      };
       return JSON.parse(res);
     } else if (checkOne.checked) {
-      const res = JSON.parse("{\"".concat(searchParam, "\" : ").concat(lowerValue, "}"));
+      const res = {
+        ["".concat(searchParam)]: lowerValue
+      };
       return res;
     } else {
       return null;
@@ -4608,9 +4612,9 @@ class CreateTaskRandomController extends Controller {
     this.view.onCreateTaskRandomValues(async (searchParams, taskDetails) => {
       try {
         //Get sentences from API
-        const sentencesRes = await _models.CreateTaskModel.sendApiRequest("/api/v1/sentences?".concat(searchParams), 'GET'); // Add sentence ID array and teacher to req.body for task creation
+        const sentences = await _models.SentenceModel.loadFromServer(searchParams); // Add sentence ID array and teacher to req.body for task creation
 
-        taskDetails.sentences = sentencesRes.data.data.data.map(e => e._id);
+        taskDetails.sentences = sentences.map(e => e.data._id);
         taskDetails.teacher = _views.DataParserView.get('user'); //Create task
 
         const createTask = await _models.CreateTaskModel.sendApiRequest('/api/v1/tasks', 'POST', taskDetails);

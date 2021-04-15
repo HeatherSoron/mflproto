@@ -213,10 +213,9 @@ export class CreateTaskRandomView extends CreateTaskView {
       const paramsObject = { ...vivaRefRes, ...levelRes, ...nonToggleValues };
       const params = new URLSearchParams(paramsObject);
 
-      const searchParams = decodeURIComponent(params.toString());
       const taskDetails = this.getValues('.task-details');
 
-      callback(searchParams, taskDetails);
+      callback(params, taskDetails);
     });
   };
 
@@ -225,11 +224,13 @@ export class CreateTaskRandomView extends CreateTaskView {
     const higherValue = this.elements[checkTwo.name].value;
 
     if (checkTwo.checked) {
-      const res = `{"${searchParam}[gte]": ${lowerValue},
-		  "${searchParam}[lte]": ${higherValue}}`;
+      const res = {
+        [`${searchParam}[gte]`]: lowerValue,
+		    [`${searchParam}[lte]`]: higherValue
+      };
       return JSON.parse(res);
     } else if (checkOne.checked) {
-      const res = JSON.parse(`{"${searchParam}" : ${lowerValue}}`);
+      const res = {[`${searchParam}`] : lowerValue};
       return res;
     } else {
       return null;

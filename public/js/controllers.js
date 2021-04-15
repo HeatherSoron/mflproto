@@ -144,12 +144,9 @@ export class CreateTaskRandomController extends Controller {
     this.view.onCreateTaskRandomValues(async (searchParams, taskDetails) => {
       try {
         //Get sentences from API
-        const sentencesRes = await CreateTaskModel.sendApiRequest(
-          `/api/v1/sentences?${searchParams}`,
-          'GET'
-        );
+        const sentences = await SentenceModel.loadFromServer(searchParams);
         // Add sentence ID array and teacher to req.body for task creation
-        taskDetails.sentences = sentencesRes.data.data.data.map((e) => e._id);
+        taskDetails.sentences = sentences.map((e) => e.data._id);
         taskDetails.teacher = DataParserView.get('user');
 
         //Create task
